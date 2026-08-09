@@ -28,18 +28,24 @@ void    print_frame_array(void *content, size_t size, size_t position, t_drift *
     uint32_t frame_count;
     void *temp_content;
     uint32_t i;
+    int jump_counter;
 
     temp_content = content;
     frame_count = frame_len(temp_content, size, position);
 
     printf("=== timestamp of timestamp drifts ===\n");
     i = 0;
+    jump_counter = 0;
     while (i < frame_count)
     {
         if (drift_list->drift_timers[i] != 0)
+        {
             printf("[%ld %u] ", drift_list->sequences[i] + 1785394762873,drift_list->drift_timers[i]);
+            jump_counter++;
+        }
         i++;
     }
+    printf("\n==== total jumps: %d ====\n", jump_counter);
 }
 
 int is_video(rtp_hdr *r) {
