@@ -52,3 +52,26 @@ int is_video(rtp_hdr *r) {
     uint8_t pt = r->b1 & 0x7f;  
     return pt;
 }
+
+static int host_is_little_endian(void) {
+    uint16_t probe = 0x0001;
+    return *(uint8_t *)&probe == 0x01;   /* is byte-0 the '1'? then low byte first */
+}
+
+void rtp_unpack_first16(uint16_t raw) {
+    uint16_t v;
+    if (host_is_little_endian())
+        v = (uint16_t)((raw >> 8) | (raw << 8));   /* swap back to wire order */
+    else
+        v = raw;
+
+    uint8_t version = (v >> 14) & 0x03;   /* V  : 2 bits */
+    uint8_t padding = (v >> 13) & 0x01;   /* P  : 1 bit  */
+    uint8_t ext     = (v >> 12) & 0x01;   /* X  : 1 bit  */
+    uint8_t cc      = (v >>  8) & 0x0F;   /* CC : 4 bits */
+    uint8_t marker  = (v >>  7) & 0x01;   /* M  : 1 bit  */
+    uint8_t pt      =  v        & 0x7F;   /* PT : 7 bits */
+
+    printf("  version=%u padding=%u ext=%u cc=%u marker=%u pt=%u\n",
+           version, padding, ext, cc, marker, pt);
+}

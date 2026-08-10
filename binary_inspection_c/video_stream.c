@@ -19,6 +19,10 @@ void inspect_video_stream(void *content, size_t size, size_t position) {
         // grab the RTP packet header immediately after it.
         r = (rtp_hdr *)(tmp_content + sizeof(mjr_frame_hdr));
        
+        // Uncomment to read each of the marker values.
+        // Loud function left commented out to not pollute output.
+        // rtp_unpack_first16(*(uint16_t*)r);
+        
         if (is_video(r) == IS_AUDIO)
             return ;
 

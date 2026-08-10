@@ -1,15 +1,6 @@
 
-#include <stdio.h>     
-#include <stdlib.h>  
-#include <string.h>    
-#include <stdint.h>    
-#include <arpa/inet.h> 
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
+
 #include "main.h"
-
-
 
 t_file_content    *read_file(char *filename)
 {
@@ -54,30 +45,6 @@ t_file_content    *read_file(char *filename)
     return f;
 
 }
-
-static int host_is_little_endian(void) {
-    uint16_t probe = 0x0001;
-    return *(uint8_t *)&probe == 0x01;   /* is byte-0 the '1'? then low byte first */
-}
-
-void rtp_unpack_first16(uint16_t raw) {
-    uint16_t v;
-    if (host_is_little_endian())
-        v = (uint16_t)((raw >> 8) | (raw << 8));   /* swap back to wire order */
-    else
-        v = raw;
-
-    uint8_t version = (v >> 14) & 0x03;   /* V  : 2 bits */
-    uint8_t padding = (v >> 13) & 0x01;   /* P  : 1 bit  */
-    uint8_t ext     = (v >> 12) & 0x01;   /* X  : 1 bit  */
-    uint8_t cc      = (v >>  8) & 0x0F;   /* CC : 4 bits */
-    uint8_t marker  = (v >>  7) & 0x01;   /* M  : 1 bit  */
-    uint8_t pt      =  v        & 0x7F;   /* PT : 7 bits */
-
-    printf("  version=%u padding=%u ext=%u cc=%u marker=%u pt=%u\n",
-           version, padding, ext, cc, marker, pt);
-}
-
 
 
 void    traverse_binary(void *content, size_t size, size_t position)
@@ -136,14 +103,13 @@ void    unpack_mjr(void *content, size_t size)
 {
     char marker[9];
     uint16_t json_len;
-    void *traverse;
-    void *drift_ptr;
+    void *intro_ptr;
+    void *frame_head_ptr;
     t_drift *drift_list;
     size_t position;
     
 
-    
-    traverse = content;
+    intro_ptr = content;
     bzero(marker, 9);
     memcpy(marker, content, 8);
 
@@ -154,35 +120,36 @@ void    unpack_mjr(void *content, size_t size)
     }
     
     // move our pointer buffer over the MJROOOO2 string
-    traverse += 8;
+    intro_ptr += 8;
+
 
     // read the json_leng value 
-    json_len = *(uint16_t *)traverse;    
+    json_len = *(uint16_t *)intro_ptr;    
     json_len = ntohs(json_len);         
 
     printf("json length is %u\n", json_len);
 
     // first skip the json_len bit byte value itself
-    traverse += sizeof(uint16_t);         // skip the 2-byte length
+    intro_ptr += sizeof(uint16_t);         // skip the 2-byte length
 
     // then skip "json_len" number of bytes immediately after that.
-    traverse += json_len;   
+    intro_ptr += json_len;   
     
-    drift_ptr = traverse;
+    frame_head_ptr = intro_ptr;
 
     position = 8 + sizeof(uint16_t) + json_len;
 
     // generic first pass of the binary. Picking potential obvious issues.
-    traverse_binary(traverse, size, position);
+    traverse_binary(intro_ptr, size, position);
     
     // zeroing in sequence drift detected in inital first pass.
-    drift_list = drift_detection(drift_ptr, size, position);
+    drift_list = drift_detection(frame_head_ptr, size, position);
 
-    print_frame_array(drift_ptr, size, position, drift_list);
+    print_frame_array(frame_head_ptr, size, position, drift_list);
 
-    ssrc_checker(drift_ptr, size, position);
+    ssrc_checker(frame_head_ptr, size, position);
     
-    inspect_video_stream(drift_ptr, size, position);
+    inspect_video_stream(frame_head_ptr, size, position);
 }
 
 

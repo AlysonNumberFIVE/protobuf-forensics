@@ -66,6 +66,7 @@ void    print_ssrc(uint32_t ssrc_be);
 void    print_recv(uint32_t recv_be);
 void    print_len(uint16_t len_be);
 int     is_video(rtp_hdr *r);
+void    rtp_unpack_first16(uint16_t raw);
 
 // ssrc_check.c
 
