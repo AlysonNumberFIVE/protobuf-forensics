@@ -5,8 +5,6 @@ import (
 	"fmt"
 )
 
-// readVarint extracts the protocol buffer's wire type and returns its number as a result.
-// as well as the index into the buffer immediately after this value.
 func readVarint(buffer []byte, position int) (uint64, int) {
 	var (
 		result uint64
@@ -28,8 +26,6 @@ func readVarint(buffer []byte, position int) (uint64, int) {
 	return result, position
 }
 
-// readTag extracts the wire time and field number of the current field in the protocol buffer
-// and returns both, alnog with the new index position into the file.
 func readTag(buffer []byte, position int) (fieldNumber int, wireType int, newPosition int) {
 	tag, position := readVarint(buffer, position)
 	fieldNumber = int(tag >> 3)
@@ -37,9 +33,6 @@ func readTag(buffer []byte, position int) (fieldNumber int, wireType int, newPos
 	return fieldNumber, wireType, position
 }
 
-// parseEvent takes in a blob from the protocol buffer stream and sorts it into an
-// HolodeckEvent, validating that it's a verified protocol buffer format before returning
-// it.
 func parseEvent(buffer []byte) HolodeckEvent {
 	var event HolodeckEvent
 	position := 0
@@ -105,7 +98,6 @@ func eventVerb(event HolodeckEvent) string {
 	return verb
 }
 
-// peekUpdates is an otool-like hex dumper for the updates field.
 func peekUpdates(events []HolodeckEvent) {
 	for _, ev := range events {
 		if len(ev.Update) == 0 {

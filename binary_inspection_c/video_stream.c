@@ -53,7 +53,6 @@ void inspect_video_stream(void *content, size_t size, size_t position) {
         tmp_content += sizeof(mjr_frame_hdr);
         i++;
         tmp_content += len;
-
     }
 
 }

@@ -10,7 +10,6 @@ t_file_content    *read_file(char *filename)
     void *filecontent;
     t_file_content *f;
 
-
     fd = open(filename, O_RDONLY, 0777);
     if (fd == -1)
         return NULL;
@@ -160,6 +159,7 @@ int main(int argc, char **argv)
         printf("usage: .mjr file\n");
         return -1;
     }
+    
     t_file_content *f;
 
     f = read_file(argv[1]);
@@ -169,12 +169,9 @@ int main(int argc, char **argv)
         return -1;
     }
 
-
     unpack_mjr(f->content, f->size );
 
     free(f->content);
     free(f);
     return 0;
-
-
 }
