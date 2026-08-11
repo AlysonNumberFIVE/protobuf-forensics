@@ -90,7 +90,8 @@ void    traverse_binary(void *content, size_t size, size_t position)
     }
 
     last_ts = ntohl(r->ts_be);
-    last_recv_be = ntohl(frame->recv_be);  
+    last_recv_be = ntohl(frame->recv_be); 
+    printf("position is %zu and size is %zu\n", position, size); 
     printf("first recv_ be is %u\n", first_recv_be);
     printf("last recv_ be is %u\n", last_recv_be);
     printf("total recv is %u\n", (last_recv_be - first_recv_be)/1000);
@@ -159,7 +160,7 @@ int main(int argc, char **argv)
         printf("usage: .mjr file\n");
         return -1;
     }
-    
+
     t_file_content *f;
 
     f = read_file(argv[1]);
