@@ -96,7 +96,9 @@ void    traverse_binary(void *content, size_t size, size_t position)
     printf("last recv_ be is %u\n", last_recv_be);
     printf("total recv is %u\n", (last_recv_be - first_recv_be)/1000);
 
-    printf("total ts is %f\n", (double)(last_ts - first_ts) / 48000.0);
+
+    int hertz = is_video(r) == IS_VIDEO ? 90000.0 : 48000.0;
+    printf("total ts is %f\n", (double)(last_ts - first_ts) / hertz);
 }
 
 void    unpack_mjr(void *content, size_t size)
